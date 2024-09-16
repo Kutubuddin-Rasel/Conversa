@@ -13,9 +13,8 @@ class AuthenticationRepository @Inject constructor(private val firebaseAuth: Fir
     val authState: StateFlow<AuthState?> =_authState
 
     init {
-        checkAuthState()
+       checkAuthState()
     }
-
     private fun checkAuthState() {
         if (firebaseAuth.currentUser == null) {
             _authState.value = AuthState.UnAuthenticated

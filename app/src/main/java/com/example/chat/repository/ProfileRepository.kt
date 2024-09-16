@@ -13,8 +13,10 @@ import javax.inject.Inject
 import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
-class ProfileRepository @Inject constructor(private val firebaseAuth: FirebaseAuth,private val firebaseFirestore: FirebaseFirestore) {
-    suspend fun updateProfile(uri: Uri?,username:String,phonenumber:String,onclick:(value:Boolean)->Unit){
+class ProfileRepository @Inject constructor(private val firebaseAuth: FirebaseAuth
+,private val firebaseFirestore: FirebaseFirestore
+) {
+    suspend fun updateProfile(uri: Uri?,username:String,phonenumber:String){
         val currentUser=firebaseAuth.currentUser
         currentUser?.let {
             try {
@@ -33,33 +35,17 @@ class ProfileRepository @Inject constructor(private val firebaseAuth: FirebaseAu
                                 image
                             )
                             .await()
-                        onclick(true)
                     }
                 } else {
                     firebaseFirestore.collection("Users").document(currentUser.uid)
                         .update("username",username, "phoneNumber", phonenumber)
                         .await()
-                    onclick(true)
                 }
             } catch (e: Exception) {
                 Log.e("ProfileRepository", "Error updating profile", e)
             }
         }
     }
-//    suspend fun setImage(uri: Uri)= suspendCancellableCoroutine<Unit>{continuation->
-//        val currentUser=firebaseAuth.currentUser
-//        currentUser?.let {
-//            val reference=FirebaseStorage.getInstance().getReference("Profile_pic/${currentUser.uid}")
-//            val uploadtask:UploadTask=reference.putFile(uri)
-//            uploadtask.addOnSuccessListener {
-//                continuation.resume(Unit)
-//            }.addOnFailureListener{
-//                continuation.resumeWithException(it)
-//            }.addOnCanceledListener {
-//                continuation.cancel()
-//            }
-//        }
-//    }
 suspend fun setImage(uri: Uri) = suspendCancellableCoroutine<Unit> { continuation ->
     val currentUser = firebaseAuth.currentUser
     if (currentUser == null) {
