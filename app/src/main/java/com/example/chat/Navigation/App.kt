@@ -114,18 +114,12 @@ fun BottomNavigationBar(navController: NavHostController, navItemList: List<bott
                     navController.navigate(bottombar.route){
                         launchSingleTop = true
                     }
-//                    navController.navigate(bottombar.route) {
-//                        popUpTo(navController.graph.startDestinationId) { saveState = true }
-//                        launchSingleTop = true
-//                        restoreState = true
-//                    }
                 },
                 icon = {
                     Image(
                         painter = painterResource(bottombar.image),
                         "", modifier = Modifier.size(40.dp),
                         colorFilter = ColorFilter.tint(if (navController.currentBackStackEntryAsState().value?.destination?.route == bottombar.route) Color.White else Color.Black)
-                        //  if (navController.currentBackStackEntryAsState().value?.destination?.route == Routes.searchUser) Color.White else Color.Black
                     )
                 },
                 label = { Text(bottombar.screenName, fontSize = 15.sp) },

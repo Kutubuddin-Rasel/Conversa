@@ -41,6 +41,7 @@ import com.example.chat.R
 import com.example.chat.Routes
 import com.example.chat.util.formatTimestampTotime
 import com.example.chat.viewModel.ChatScreenViewModel
+import com.example.chat.viewModel.ChatsViewModel
 import com.google.firebase.Timestamp
 
 
@@ -107,6 +108,7 @@ fun ChatScreen(username: String, userid: String, navController: NavController) {
                             chatScreenViewModel.update(userid,chat.value)
                             chatScreenViewModel.setChat("")
                             chatScreenViewModel.getchats(userid)
+                            //chatsViewModel.recentchat()
                         }
                     )
                 )

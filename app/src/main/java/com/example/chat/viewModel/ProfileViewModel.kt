@@ -34,12 +34,10 @@ init {
         _selectedImageUri.value=uri
     }
 
-    fun updateProfile(uri: Uri?,name:String,phonenumber:String,onclick:(value:Boolean)->Unit){
+    fun updateProfile(uri: Uri?,name:String,phonenumber:String){
         viewModelScope.launch(Dispatchers.IO) {
             Log.d("EVERY VALUES PASS ", listOf(name,phonenumber,uri).toString())
-            profileRepository.updateProfile(uri,name,phonenumber){
-                onclick(it)
-            }
+            profileRepository.updateProfile(uri,name,phonenumber)
         }
     }
     fun getDetails(){

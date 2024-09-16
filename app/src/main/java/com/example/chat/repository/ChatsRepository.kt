@@ -8,8 +8,11 @@ import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FieldPath
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.tasks.await
 import javax.inject.Inject
 
@@ -19,34 +22,37 @@ class ChatsRepository @Inject constructor(
     private val _reccentchat=MutableStateFlow<List<recentChat>>(emptyList())
     val recentchat:StateFlow<List<recentChat>> =_reccentchat
 
-    suspend fun currentUserIdDocuments() {
+   suspend fun currentUserIdDocuments() {
         val currentUser = firebaseAuth.currentUser
         currentUser?.let {
             val reference = firebaseFirestore.collection("ChatRoom")
             val query: Query = reference.whereArrayContains("usersIds", currentUser.uid)
                 .orderBy("timestamp", Query.Direction.DESCENDING)
-            try {
-                val querySnapshot = query.get().await()
-                if (querySnapshot.isEmpty) {
-                    Log.d("CurrentUserDocuments", "Nothing found to that Id")
-                } else {
-                    val recentChats = mutableListOf<recentChat>()
-                    val userIds = querySnapshot.flatMap { it.toObject(chatroom::class.java).usersIds }
-                        .filter { it != currentUser.uid }
-                        .distinct()
 
-                    val userDetails = getUsersDetails(userIds)
-
-                    for (document in querySnapshot) {
-                        val chatroom = document.toObject(chatroom::class.java)
-                        val userid = getAnotherUserID(userids = chatroom.usersIds)
-                        val (name,image) = userDetails[userid] ?: Pair("Unknown","")
-                        recentChats.add(recentChat(name, userid, chatroom.lastMessage, chatroom.lastMessageSenderId, chatroom.timestamp,image))
-                    }
-                    _reccentchat.value = recentChats
+            query.addSnapshotListener { snapshot, exception ->
+                if (exception != null) {
+                    Log.e("ChatRepository", "Error listening for updates", exception)
+                    return@addSnapshotListener
                 }
-            } catch (e: Exception) {
-                Log.e("CurrentUserDocuments", "Error fetching documents", e)
+                snapshot?.let { querySnapshot ->
+                    // Start a new coroutine to handle suspending function calls
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val recentChats = mutableListOf<recentChat>()
+                        val userIds = querySnapshot.flatMap { it.toObject(chatroom::class.java).usersIds }
+                            .filter { it != currentUser.uid }
+                            .distinct()
+
+                        val userDetails = getUsersDetails(userIds)
+
+                        for (document in querySnapshot) {
+                            val chatroom = document.toObject(chatroom::class.java)
+                            val userid = getAnotherUserID(userids = chatroom.usersIds)
+                            val (name, image) = userDetails[userid] ?: Pair("Unknown", "")
+                            recentChats.add(recentChat(name, userid, chatroom.lastMessage, chatroom.lastMessageSenderId, chatroom.timestamp, image))
+                        }
+                        _reccentchat.value = recentChats
+                    }
+                }
             }
         }
     }

@@ -7,5 +7,6 @@ import androidx.navigation.NavController
 
 @Composable
 fun LogIn(navController: NavController,state:String) {
+
     Reuse(navController,state)
 }
