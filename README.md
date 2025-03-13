@@ -1,4 +1,4 @@
-# ChatApp
+# Conversa
 
 ChatApp is an Android-based messaging application built with Kotlin and Firebase. It provides real-time chat functionality, allowing users to communicate seamlessly. The app leverages Firebase Authentication for secure login, Cloud Firestore for storing user details and chat histories, and Firebase Storage for handling user-uploaded profile pictures.
 
